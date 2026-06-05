@@ -17,16 +17,16 @@ repositories {
 
 kotlin {
     jvm {
-        jvmToolchain(11)
+        jvmToolchain(17)
         withJava()
     }
     sourceSets {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation("net.dongliu:apk-parser:2.6.10")
             }
         }
-        val jvmTest by getting
     }
 }
 
@@ -35,7 +35,7 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "ComposeDemo"
+            packageName = "ApkManager"
             packageVersion = "1.0.0"
         }
     }

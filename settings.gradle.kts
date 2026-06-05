@@ -1,9 +1,9 @@
 pluginManagement {
     repositories {
-        google()
         gradlePluginPortal()
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        google()
     }
 
     plugins {
@@ -12,5 +12,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = "ComposeDemo"
+rootProject.name = "ApkManager"
 

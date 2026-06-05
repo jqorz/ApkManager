@@ -1,68 +1,48 @@
-import androidx.compose.material.MaterialTheme
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material.Button
-import androidx.compose.material.Text
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.awt.ComposeWindow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onPlaced
-import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import java.awt.datatransfer.DataFlavor
-import java.awt.dnd.DnDConstants
-import java.awt.dnd.DropTarget
-import java.awt.dnd.DropTargetAdapter
-import java.awt.dnd.DropTargetDropEvent
-import javax.swing.JFileChooser
-import javax.swing.JPanel
-import javax.swing.SwingUtilities
-import javax.swing.UIManager
-import javax.swing.filechooser.FileNameExtensionFilter
-import kotlin.math.roundToInt
+import androidx.compose.ui.window.rememberWindowState
+import model.ApkInfo
+import settings.AppSettings
+import ui.MainScreen
+import ui.SettingsScreen
+
+enum class Page { MAIN, SETTINGS }
 
 @Composable
-@Preview
-fun app(window: ComposeWindow) {
-    val result = remember { mutableStateOf("") }
+fun App() {
+    val currentPage = remember { mutableStateOf(Page.MAIN) }
+    val apkList = remember { mutableStateOf<List<ApkInfo>>(emptyList()) }
+    val lastScanPath = remember { mutableStateOf("") }
 
-    MaterialTheme {
-        Column(Modifier.fillMaxSize(), Arrangement.spacedBy(5.dp)) {
-            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    result.value = ShellUtils.execCmd("adb devices", "").output ?: ""
-                }) {
-                Text(result.value)
+    when (currentPage.value) {
+        Page.MAIN -> MainScreen(
+            apkList = apkList,
+            lastScanPath = lastScanPath,
+            onNavigateToSettings = { currentPage.value = Page.SETTINGS }
+        )
+        Page.SETTINGS -> SettingsScreen(
+            onBack = {
+                // 路径变化时清空列表，回到主页会自动重新扫描
+                if (AppSettings.getScanPath() != lastScanPath.value) {
+                    apkList.value = emptyList()
+                    lastScanPath.value = ""
+                }
+                currentPage.value = Page.MAIN
             }
-            Button(modifier = Modifier.align(Alignment.CenterHorizontally),
-                onClick = {
-                    result.value = ""
-                }) {
-                Text("Reset")
-            }
-
-            UIUtil.DropBoxPanel(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight().background(Color.Cyan),
-                window = window
-            ) {
-                println(it.joinToString(","))
-            }
-        }
-
-
+        )
     }
 }
 
-
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication, title = "test app") {
-        app(window)
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "APK Manager",
+        state = rememberWindowState(width = 900.dp, height = 700.dp)
+    ) {
+        App()
     }
 }
