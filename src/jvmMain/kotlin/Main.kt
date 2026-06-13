@@ -9,6 +9,7 @@ import model.ApkInfo
 import settings.AppSettings
 import ui.MainScreen
 import ui.SettingsScreen
+import java.awt.Dimension
 
 enum class Page { MAIN, SETTINGS }
 
@@ -38,11 +39,18 @@ fun App() {
 }
 
 fun main() = application {
+    val minWidth = 1280.dp
+    val minHeight = 720.dp
     Window(
         onCloseRequest = ::exitApplication,
         title = "APK Manager",
-        state = rememberWindowState(width = 900.dp, height = 700.dp)
+        state = rememberWindowState(width = minWidth, height = minHeight)
     ) {
+        val density = window.graphicsConfiguration.defaultTransform.scaleX.toFloat()
+        window.minimumSize = Dimension(
+            (minWidth.value * density).toInt(),
+            (minHeight.value * density).toInt()
+        )
         App()
     }
 }
